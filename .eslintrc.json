@@ -1,6 +1,16 @@
 {
   "extends": ["next/core-web-vitals"],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "error"
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSAnyKeyword",
+        "message": "No any. CLAUDE.md, Conventions."
+      },
+      {
+        "selector": "TSNonNullExpression",
+        "message": "No non-null assertions — say what happens when the value is absent."
+      }
+    ]
   }
 }
