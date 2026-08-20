@@ -85,11 +85,16 @@ async function readOverview(year: number, grid: OverviewGrid): Promise<CellField
   }
 }
 
-export function createEogProvider(sourceVersion: string): SourceProvider {
+export function createEogProvider(
+  sourceVersion: string,
+  /** Product names as `data:fetch` recorded them, so the manifest quotes the
+   *  distribution rather than a constant that could drift from it. */
+  products?: { monthlyProduct: string; annualProduct: string },
+): SourceProvider {
   return {
     kind: 'eog',
-    monthlyProduct: MONTHLY_PRODUCT,
-    annualProduct: ANNUAL_PRODUCT,
+    monthlyProduct: products?.monthlyProduct ?? MONTHLY_PRODUCT,
+    annualProduct: products?.annualProduct ?? ANNUAL_PRODUCT,
     sourceVersion,
     monthly: (city, month) => readPair(city, month),
     annual: (city, year) => readPair(city, `${year}.annual`),

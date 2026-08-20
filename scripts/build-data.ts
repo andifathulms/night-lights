@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile, access } from 'node:fs/promises'
+import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { CITIES } from '@/data/cities'
 import { ADEQUATE_MIN_OBSERVATIONS } from '@/lib/lights/adequacy'
@@ -41,13 +41,47 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * What `data:fetch` recorded about the files it pulled. The digest covers the
+ * checksums of every distributed archive, so a bundle can be traced back to
+ * the exact composites behind it rather than to a version string someone
+ * typed.
+ */
+async function readSourceStamp(): Promise<
+  { sourceVersion: string; monthlyProduct: string; annualProduct: string } | undefined
+> {
+  try {
+    const raw = await readFile(join(process.cwd(), 'data', 'raw', 'SOURCE.json'), 'utf8')
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    const { sourceVersion, monthlyProduct, annualProduct } = parsed
+    if (
+      typeof sourceVersion === 'string' &&
+      typeof monthlyProduct === 'string' &&
+      typeof annualProduct === 'string'
+    ) {
+      return { sourceVersion, monthlyProduct, annualProduct }
+    }
+    return undefined
+  } catch {
+    return undefined
+  }
+}
+
 async function chooseProvider(): Promise<SourceProvider> {
   const requested = process.env.SOURCE
-  const sourceVersion = process.env.SOURCE_VERSION ?? 'vnl-v1-monthly+v2.1-annual'
+  const stamp = await readSourceStamp()
+  const sourceVersion =
+    process.env.SOURCE_VERSION ?? stamp?.sourceVersion ?? 'vnl-v1-monthly+v2.1-annual'
   const haveClips = await exists(join(process.cwd(), 'data', 'raw', 'clips'))
 
   if (requested === 'eog' || (requested === undefined && haveClips)) {
-    return createEogProvider(sourceVersion)
+    if (stamp === undefined) {
+      throw new Error(
+        'EOG clips are present but data/raw/SOURCE.json is missing — rerun `pnpm data:fetch` ' +
+          'so the bundle can record which composites it was built from.',
+      )
+    }
+    return createEogProvider(sourceVersion, stamp)
   }
   if (requested !== undefined && requested !== 'synthetic') {
     throw new Error(`unknown SOURCE=${requested}; expected 'eog' or 'synthetic'`)
