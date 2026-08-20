@@ -106,7 +106,7 @@ export function CityView({
         {copy.city.windowValue(windowSpanKm(city.window))}
       </p>
       {city.note === undefined ? null : (
-        <p className="mt-3 max-w-2xl text-base text-muted">{city.note}</p>
+        <p className="mt-3 max-w-2xl text-base text-muted">{city.note[locale]}</p>
       )}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">

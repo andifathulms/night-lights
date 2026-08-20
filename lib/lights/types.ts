@@ -84,7 +84,8 @@ export interface City {
   /** Sumatra and Kalimantan windows sit in the peat-fire belt. PRD.md §2. */
   readonly fireBelt: boolean
   readonly window: CityWindow
-  readonly note?: string
+  /** Indonesian first; the UI is Indonesian-first and this is UI copy. */
+  readonly note?: { readonly id: string; readonly en: string }
 }
 
 export interface CitySeries {

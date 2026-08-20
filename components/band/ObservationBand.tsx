@@ -54,11 +54,13 @@ export function ObservationBand({
           />
         ),
       )}
+      {/* Right-aligned so the band's ceiling cannot be misread as a radiance tick. */}
       <text
-        x={CHART.padLeft + 2}
-        y={CHART.bandTop - 4}
-        className="fill-muted font-mono"
+        x={CHART.width - CHART.padRight - 2}
+        y={CHART.bandTop + 10}
+        className="fill-confidence font-mono"
         fontSize={11}
+        textAnchor="end"
       >
         {BAND_CEILING}
       </text>

@@ -66,7 +66,7 @@ export const citySchema = z.object({
   coastal: z.boolean(),
   fireBelt: z.boolean(),
   window: cityWindowSchema,
-  note: z.string().optional(),
+  note: z.object({ id: z.string().min(1), en: z.string().min(1) }).optional(),
 })
 
 export const atlasGeometrySchema = z.object({

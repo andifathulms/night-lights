@@ -84,18 +84,30 @@ export function CityChart({
           </pattern>
         </defs>
 
-        {/* Gridlines at quarters of the radiance axis. */}
-        {[0.25, 0.5, 0.75, 1].map((fraction) => (
-          <line
-            key={fraction}
-            x1={CHART.padLeft}
-            x2={CHART.width - CHART.padRight}
-            y1={CHART.lineTop + CHART.lineHeight * (1 - fraction)}
-            y2={CHART.lineTop + CHART.lineHeight * (1 - fraction)}
-            className="stroke-rule"
-            strokeWidth={0.5}
-            strokeOpacity={0.7}
-          />
+        {/*
+          Gridlines at quarters of the radiance axis, labelled. A trend wants
+          an axis you can read values off, not just a shape. DESIGN.md §2.
+        */}
+        {[0, 0.25, 0.5, 0.75, 1].map((fraction) => (
+          <g key={fraction}>
+            <line
+              x1={CHART.padLeft}
+              x2={CHART.width - CHART.padRight}
+              y1={CHART.lineTop + CHART.lineHeight * (1 - fraction)}
+              y2={CHART.lineTop + CHART.lineHeight * (1 - fraction)}
+              className="stroke-rule"
+              strokeWidth={0.5}
+              strokeOpacity={0.7}
+            />
+            <text
+              x={CHART.padLeft + 2}
+              y={CHART.lineTop + CHART.lineHeight * (1 - fraction) - 3}
+              className="fill-muted font-mono"
+              fontSize={11}
+            >
+              {(geometry.max * fraction).toFixed(geometry.max < 10 ? 1 : 0)}
+            </text>
+          </g>
         ))}
 
         <RadianceLine geometry={geometry} hatchId={hatchId} />
