@@ -39,9 +39,27 @@ missing. It is not a measurement and the site never pretends otherwise.
 For the real composites:
 
 ```bash
-pnpm data:fetch     # needs network and GDAL on the path; writes data/raw
-pnpm data:build     # picks up the clips automatically
+pnpm data:fetch --dry-run          # prints the plan and the size estimate first
+EOG_USERNAME=… EOG_PASSWORD=… pnpm data:fetch
+pnpm data:build                    # picks up the clips automatically
 ```
+
+Three things to know before starting that:
+
+- **It needs an account.** Everything under `eogdata.mines.edu/nighttime_light/`
+  is behind OAuth; registration is free at
+  [eogdata.mines.edu/products/register](https://eogdata.mines.edu/products/register/).
+- **It needs GDAL** on the path, for the mosaic and the window clips.
+- **It is roughly 420 GB.** Monthly composites ship as per-tile `.tgz`
+  archives and annual composites as gzipped GeoTIFFs — neither can be
+  range-read — so covering Indonesia means pulling two global tiles per month
+  for fourteen years. `--dry-run` prints the estimate; `--months=` and
+  `--years=` cut it down for a plumbing test.
+
+The fetch is resumable, deletes each archive once its windows are cut, and
+writes `data/raw/SOURCE.json` with a checksum of every file it pulled. The
+build refuses EOG clips that arrive without it, so a bundle can always be
+traced to the exact composites behind it.
 
 Raw composites are never committed, and neither is the generated bundle —
 `public/data` is ignored and CI regenerates it before the export.

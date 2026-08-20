@@ -162,13 +162,20 @@ and selector, contamination flags from computed divergence, comparison and
 change table, small multiples and method page are all in.
 
 **One thing is outstanding and it is the important one: the shipped bundle is
-built from the deterministic stand-in provider, not from EOG composites.**
-`pnpm data:fetch` is written and takes the real path — published composites,
-GDAL window clips — but has never been run here, so nothing on the site is a
-measurement yet. The manifest records `provenance: synthetic`, `data:validate`
-rejects a synthetic bundle that omits its caveat, and every page renders the
-banner. Running the fetch against EOG and rebuilding is the next task, and
-the numbers should be treated as meaningless until it happens.
+built from the deterministic stand-in provider, not from EOG composites.** The
+manifest records `provenance: synthetic`, `data:validate` rejects a synthetic
+bundle that omits its caveat, and every page renders the banner. Treat the
+numbers as meaningless until a real fetch has run.
+
+`pnpm data:fetch` now matches EOG's actual distribution — token auth against
+the Keycloak realm, directory listing to discover the processing-date suffix,
+per-tile `.tgz` for monthly and gzipped GeoTIFF for annual, mosaic and clip
+through GDAL. It has **not** been run, and running it needs three things this
+environment does not have: an EOG account (`EOG_USERNAME` / `EOG_PASSWORD`),
+GDAL on the path, and roughly 420 GB of transfer and scratch. `--dry-run`
+prints the plan without either. `--months=` and `--years=` subset it, which is
+how to test the plumbing without the full pull — but a partial fetch makes a
+partial series, so do not ship one.
 
 Two deviations from the layout above, both deliberate:
 
