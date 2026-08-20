@@ -11,3 +11,6 @@ data/raw/
 
 # Generated bundle — `pnpm data:build` writes it, CI regenerates it before the export.
 public/data/
+
+# Local geospatial toolchain for data:fetch — GDAL via rasterio, not a runtime dep.
+.venv/
