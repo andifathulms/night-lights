@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { decodeFrame, type AtlasGeometry } from '@/lib/lights/decode'
 import { loadStack, type LoadedStack } from '@/lib/client/bundle'
-import { paintFrame } from './paint'
+import { paintFrame } from '@/lib/chart/paint'
 import { formatMonth, type Locale } from '@/lib/i18n'
 import type { MonthlyRecord } from '@/lib/lights/types'
 
@@ -88,7 +88,8 @@ function Thumbnail({
       geometry,
       tileIndex: index,
     })
-    context.putImageData(paintFrame(frame), 0, 0)
+    const raster = paintFrame(frame)
+    context.putImageData(new ImageData(raster.pixels, raster.width, raster.height), 0, 0)
   }, [stack, geometry, index])
 
   return (

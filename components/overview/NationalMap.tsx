@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { decodeFrame, type AtlasGeometry } from '@/lib/lights/decode'
 import { assetUrl, loadStack, type LoadedStack } from '@/lib/client/bundle'
-import { paintFrame } from '@/components/stack/paint'
+import { paintFrame } from '@/lib/chart/paint'
 import { cityCentre, projectToGrid } from '@/lib/chart/project'
 import type { City } from '@/lib/lights/types'
 import type { Locale } from '@/lib/i18n'
@@ -76,7 +76,8 @@ export function NationalMap({
     // The browse map is a coarse average of a whole year, so it sits much
     // lower on the ramp than a city window; a smaller display maximum keeps
     // the archipelago readable instead of nearly black.
-    context.putImageData(paintFrame(frame, 24), 0, 0)
+    const raster = paintFrame(frame, 24)
+    context.putImageData(new ImageData(raster.pixels, raster.width, raster.height), 0, 0)
   }, [stack, year, years, geometry])
 
   return (

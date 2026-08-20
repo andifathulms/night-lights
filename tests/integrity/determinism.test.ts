@@ -5,6 +5,7 @@ import { createSyntheticProvider } from '@/scripts/sources/synthetic'
 import { MONTHS } from '@/scripts/config'
 import { CITIES } from '@/data/cities'
 import { encodeObservations, encodeRadiance } from '@/lib/lights/quantise'
+import { buildCity } from '@/scripts/pipeline'
 
 /**
  * The same source version and city definitions must produce a byte-identical
@@ -65,4 +66,45 @@ describe('the source provider is deterministic', () => {
     const second = digest(pack(await provider.monthly(city, MONTHS[1] as string)))
     expect(first).not.toBe(second)
   })
+})
+
+describe('the pipeline is deterministic end to end', () => {
+  const city = CITIES.find((entry) => entry.id === 'palangkaraya')
+
+  it('produces byte-identical stacks and an identical series across runs', async () => {
+    // Drives the same buildCity the CLI does, twice, against separately
+    // constructed providers. This is the assertion behind "same source
+    // version and city definitions produce a byte-identical bundle" —
+    // asserted on the real code path rather than a stand-in for it.
+    if (city === undefined) throw new Error('palangkaraya is not in the city list')
+
+    const first = await buildCity(
+      createSyntheticProvider({ months: MONTHS, cities: CITIES, sourceVersion: 'test' }),
+      city,
+    )
+    const second = await buildCity(
+      createSyntheticProvider({ months: MONTHS, cities: CITIES, sourceVersion: 'test' }),
+      city,
+    )
+
+    expect(digest(first.radiancePng)).toBe(digest(second.radiancePng))
+    expect(digest(first.observationsPng)).toBe(digest(second.observationsPng))
+    expect(JSON.stringify(first.series)).toBe(JSON.stringify(second.series))
+  }, 60_000)
+
+  it('emits a stack whose geometry matches the declared city window', async () => {
+    if (city === undefined) throw new Error('palangkaraya is not in the city list')
+    const built = await buildCity(
+      createSyntheticProvider({ months: MONTHS, cities: CITIES, sourceVersion: 'test' }),
+      city,
+    )
+    expect(built.geometry.tileWidth).toBe(city.window.widthPx)
+    expect(built.geometry.tileHeight).toBe(city.window.heightPx)
+    expect(built.geometry.tiles).toBe(MONTHS.length)
+    expect(built.series.months).toHaveLength(MONTHS.length)
+    // Every record carries its count, straight out of the pipeline.
+    for (const record of built.series.months) {
+      expect(Number.isInteger(record.observations)).toBe(true)
+    }
+  }, 60_000)
 })

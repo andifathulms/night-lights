@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { decodeFrame, type AtlasGeometry } from '@/lib/lights/decode'
 import { loadStack, type LoadedStack } from '@/lib/client/bundle'
-import { paintFrame } from './paint'
+import { paintFrame } from '@/lib/chart/paint'
 
 /**
  * The city window, month by month.
@@ -58,7 +58,8 @@ export function ImageStack({
       geometry,
       tileIndex: Math.min(Math.max(index, 0), geometry.tiles - 1),
     })
-    context.putImageData(paintFrame(frame), 0, 0)
+    const raster = paintFrame(frame)
+    context.putImageData(new ImageData(raster.pixels, raster.width, raster.height), 0, 0)
   }, [stack, index, geometry])
 
   return (

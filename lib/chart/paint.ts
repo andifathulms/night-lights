@@ -4,12 +4,22 @@ import { NIGHT_RGB, NO_DATA_RGB, rampColour, rampPosition } from '@/lib/chart/ra
 /**
  * Turn a decoded frame into pixels.
  *
- * Pure, so the rule that matters here is testable: a cell the sensor never
- * saw is painted with the no-data grey in a hatch, never with the bottom of
- * the radiance ramp. A dark cell and an unseen cell must not look alike.
- * CLAUDE.md invariant 2, DESIGN.md §9.
+ * It returns a plain buffer rather than an ImageData so it stays pure and
+ * runs in Node — which is the point, because the rule it enforces is the one
+ * the project cannot afford to lose: a cell the sensor never saw is painted
+ * with the no-data grey in a hatch, never with the bottom of the radiance
+ * ramp. A dark cell and an unseen cell must not look alike, and
+ * `tests/integrity/paint.test.ts` asserts that on the rendered bytes rather
+ * than on the model alone. CLAUDE.md invariant 2, DESIGN.md §9.
  */
-export function paintFrame(frame: DecodedFrame, max?: number): ImageData {
+export interface RasterFrame {
+  readonly width: number
+  readonly height: number
+  /** RGBA, row-major. */
+  readonly pixels: Uint8ClampedArray
+}
+
+export function paintFrame(frame: DecodedFrame, max?: number): RasterFrame {
   const pixels = new Uint8ClampedArray(frame.width * frame.height * 4)
 
   for (let y = 0; y < frame.height; y += 1) {
@@ -34,5 +44,5 @@ export function paintFrame(frame: DecodedFrame, max?: number): ImageData {
     }
   }
 
-  return new ImageData(pixels, frame.width, frame.height)
+  return { width: frame.width, height: frame.height, pixels }
 }
