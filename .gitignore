@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.DS_Store
+.env*.local
+
+# Raw EOG composites are never committed — CLAUDE.md invariant 9.
+data/raw/
