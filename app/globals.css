@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * DESIGN.md §1 house layer and §4 colour. Durations and easing live here as
+ * custom properties so motion is one decision rather than forty.
+ */
+:root {
+  --dur-fast: 120ms;
+  --dur-state: 240ms;
+  --dur-frame: 280ms;
+  --dur-orchestrated: 560ms;
+  --ease-house: cubic-bezier(0.2, 0, 0, 1);
+  --hairline: 0.5px;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    /* Night, not black: night imagery against pure black loses its low end. */
+    background-color: theme('colors.night');
+    color: theme('colors.ink');
+    font-family: theme('fontFamily.body');
+    /* Dark-mode weight correction. DESIGN.md §5. */
+    font-weight: 350;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+  }
+
+  h1, h2, h3 {
+    font-family: theme('fontFamily.display');
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  /* Tabular figures everywhere a value updates, so readouts do not jitter. */
+  .tnum,
+  table,
+  time,
+  output {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  small, .text-xs {
+    letter-spacing: 0.01em;
+  }
+
+  :focus-visible {
+    outline: 3px solid theme('colors.line');
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: theme('colors.r2');
+    color: theme('colors.r5');
+  }
+}
+
+@layer components {
+  .rule {
+    border-color: theme('colors.rule');
+    border-width: var(--hairline);
+  }
+
+  .panel {
+    background-color: theme('colors.panel');
+    border: var(--hairline) solid theme('colors.rule');
+    border-radius: 2px;
+  }
+
+  /* The citation line: small, monospace, present wherever a claim is made. */
+  .citation {
+    font-family: theme('fontFamily.mono');
+    font-size: 14px;
+    line-height: 1.5;
+    color: theme('colors.muted');
+    letter-spacing: 0.01em;
+  }
+
+  /*
+   * No-data carries a hatch as well as its grey, so the distinction between
+   * "not seen" and "seen and dark" survives colour blindness, a bad monitor,
+   * and a greyscale print. DESIGN.md §9.
+   */
+  .hatch-nodata {
+    background-image: repeating-linear-gradient(
+      45deg,
+      theme('colors.nodata') 0,
+      theme('colors.nodata') 1px,
+      transparent 1px,
+      transparent 4px
+    );
+    background-color: transparent;
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * A complete alternative, never a degraded one: playback simply does not
+   * start, the scrubber stays fully usable, and the small-multiples grid
+   * shows every month at once. DESIGN.md §7.
+   */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
