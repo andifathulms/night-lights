@@ -1,0 +1,64 @@
+name: build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Raw composites are never committed, so the bundle is rebuilt here.
+      # Set SOURCE=eog with the fetch step enabled to build from the real
+      # composites; without it the deterministic stand-in is used and the
+      # site says so on every page.
+      - run: pnpm data:build
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+
+      # These three gate the deploy. Never weaken one to make a build pass.
+      - run: pnpm test:integrity
+      - run: pnpm test:flags
+      - run: pnpm data:validate
+
+      - run: pnpm exec next build
+      - name: assert .nojekyll survived the export
+        run: test -f out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
