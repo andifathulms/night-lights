@@ -157,4 +157,25 @@ The site states that it shows satellite-observed light rather than development o
 
 ## Current state
 
-M0 — not yet scaffolded. Next: the EOG fetch, city clipping, quantisation and PNG packing pipeline, plus the per-city series with observation counts. **No UI work until the series validate and every record carries its count.**
+M0–M5 implemented. Pipeline, city view with the observation band, browse map
+and selector, contamination flags from computed divergence, comparison and
+change table, small multiples and method page are all in.
+
+**One thing is outstanding and it is the important one: the shipped bundle is
+built from the deterministic stand-in provider, not from EOG composites.**
+`pnpm data:fetch` is written and takes the real path — published composites,
+GDAL window clips — but has never been run here, so nothing on the site is a
+measurement yet. The manifest records `provenance: synthetic`, `data:validate`
+rejects a synthetic bundle that omits its caveat, and every page renders the
+banner. Running the fetch against EOG and rebuilding is the next task, and
+the numbers should be treated as meaningless until it happens.
+
+Two deviations from the layout above, both deliberate:
+
+- The generated bundle is emitted to `public/data/` rather than `data/`, because
+  a static export can only serve `public/`. `data/cities/` still holds the city
+  definitions, which are the only committed data. `public/data/` is ignored and
+  CI regenerates it before the export.
+- `app/[locale]/` renders the overview directly, with `jelajah/` re-exporting
+  it, so arriving at the site lands on the doorway — two interactions from
+  arriving to watching a city light up (PRD.md §11).
