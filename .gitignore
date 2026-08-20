@@ -8,3 +8,6 @@ coverage/
 
 # Raw EOG composites are never committed — CLAUDE.md invariant 9.
 data/raw/
+
+# Generated bundle — `pnpm data:build` writes it, CI regenerates it before the export.
+public/data/
